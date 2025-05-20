@@ -21,7 +21,7 @@ jobs:
           java-version: '21'
 
       - name: Build and test with Maven
-        run: --file ./TP/TP2/simple-api/pom.xml  mvn clean verify
+        run: mvn -f ./TP/TP2/simple-api/pom.xml clean verify
 
   build-and-push-docker-image:
     needs: test-backend
