@@ -82,11 +82,15 @@ COPY --from=myapp-build $MYAPP_HOME/target/*.jar $MYAPP_HOME/myapp.jar
 ENTRYPOINT ["java", "-jar", "myapp.jar"]
 ```
 
-#### 1-6 Why is docker-compose so important?
+### 1-5 Why do we need a reverse proxy?
+
+A reverse proxy is used to do the link with the backend usaly in a more user-friendly. It is also separed from the database making it more secured.
+
+### 1-6 Why is docker-compose so important?
 
 A docker compose file allows to manage easily application with different containers, networks, configurations in one file. It also makes it easier and more consitent to run an the containers of an app.
 
-#### 1-7 Document docker-compose most important commands.
+### 1-7 Document docker-compose most important commands.
 
 ```
 docker-compose up
@@ -118,7 +122,7 @@ docker-compose ps
 ```
 Shows the different containers
 
-#### 1-8 Document your docker-compose file.
+### 1-8 Document your docker-compose file.
 
 ```
 services:
@@ -165,7 +169,7 @@ services:
 
     # Specific container name because diffent from "httpd"
     container_name: frontend
-    
+
     # Specify the port where we can acess the app
     ports:
       - "80:80"
@@ -182,5 +186,26 @@ networks:
   public:
     name: public-network
     driver: bridge
-``
+```
 
+### 1-9 Document your publication commands and published images in dockerhub.
+
+First I login with
+```
+docker login
+```
+Then I taged my image
+```
+tag database dorianbqn/tp1-database:1.0
+tag backend dorianbqn/tp1-backend:1.0
+tag frontend dorianbqn/tp1-frontend:1.0
+```
+Then I pushed
+```
+docker push dorianbqn/tp1-database:1.0
+docker push dorianbqn/tp1-backend:1.0
+docker push dorianbqn/tp1-frontend:1.0
+```
+### 1-10 Why do we put our images into an online repo?
+
+The online repo is used to store share and import images easily.
