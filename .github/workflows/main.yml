@@ -1,7 +1,6 @@
 name: CI and CD Pipeline
 
 on:
-#to begin you want to launch this job in main and develop
   push:
     branches:
       - main
@@ -11,25 +10,32 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-24.04
-#checkout your github code using actions/checkout@v4
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-#do the same with another action (actions/setup-java@v4) that enable to setup jdk 21
+
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-#finally build your app with the latest command
+
       - name: Build and test with Maven
         run: mvn -f ./TP/TP2/simple-api/pom.xml clean verify
-# define job to build and publish docker image
+
+      - name: Run SonarCloud Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
+          -Dsonar.projectKey=your-project-key \
+          -Dsonar.organization=your-organization \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+          -f ./TP/TP2/simple-api/pom.xml
+
   build-and-push-docker-image:
     needs: test-backend
- # run only when code is compiling and tests are passing
     runs-on: ubuntu-24.04
-# steps to perform in job
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -40,9 +46,7 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
- # relative path to the place where source code with Dockerfile is located
           context: ./TP/TP2/simple-api
-# Note: tags has to be all lower-case
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-backend:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
