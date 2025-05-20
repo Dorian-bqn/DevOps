@@ -1,0 +1,46 @@
+services:
+  database:
+    build:
+      context: ./Postgres
+    image: database
+    env_file:
+      - .env
+    volumes:
+      - ${VOLUME_PATH}:/var/lib/postgresql/data
+    networks:
+      - internal
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./Backend/simpleapi
+    image: backend
+    depends_on:
+      - database
+    env_file:
+      - .env
+    networks:
+      - internal
+      - public
+    restart: on-failure:3 
+
+  httpd:
+    build:
+      context: ./Http-server
+    image: frontend
+    container_name: frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - public
+    restart: no 
+
+networks:
+  internal:
+    name: internal-network
+    driver: bridge
+  public:
+    name: public-network
+    driver: bridge

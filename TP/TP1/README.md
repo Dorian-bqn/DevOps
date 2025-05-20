@@ -81,3 +81,106 @@ COPY --from=myapp-build $MYAPP_HOME/target/*.jar $MYAPP_HOME/myapp.jar
 
 ENTRYPOINT ["java", "-jar", "myapp.jar"]
 ```
+
+#### 1-6 Why is docker-compose so important?
+
+A docker compose file allows to manage easily application with different containers, networks, configurations in one file. It also makes it easier and more consitent to run an the containers of an app.
+
+#### 1-7 Document docker-compose most important commands.
+
+```
+docker-compose up
+```
+It builds, creates or recreates, starts and connects the different containers.
+
+```
+docker-compose up --build	
+```
+Same as previous but it also forces the rebuilt of the images before running the containers
+
+```
+docker-compose down	
+```
+Stop and removes containers and networks
+
+```
+docker-compose down	-v
+```
+Same but also removes the volumes.
+
+```
+docker-compose logs	
+```
+Shows the logs of the different containers
+
+```
+docker-compose ps
+```
+Shows the different containers
+
+#### 1-8 Document your docker-compose file.
+
+```
+services:
+  database:
+    build:
+
+    # Build an image called database from the Dockerfile in the context directory
+      context: ./Postgres
+    image: database
+
+    # Indicates the .env file containing the different variables needed to connect to the database
+    env_file:
+      - .env
+
+    # Indicates the path of the folder where the data from the container will be stored in a persistant way
+    volumes:
+      - ${VOLUME_PATH}:/var/lib/postgresql/data
+
+    # Create a network called internal to allow the different containers present on that network to communicate
+    networks:
+      - internal
+
+    restart: unless-stopped # Will restart unless manualy stopped
+
+  backend:
+    build:
+      context: ./Backend/simpleapi
+    image: backend
+    depends_on:
+      - database #Start database first
+    env_file:
+      - .env
+      
+      # Connected to two different networks so that it can make the bridge between the database and the frontend without connecting them directly.
+    networks:
+      - internal
+      - public
+    restart: on-failure:3 #Will try to restart 3 times if it fails
+
+  httpd:
+    build:
+      context: ./Http-server
+    image: frontend
+
+    # Specific container name because diffent from "httpd"
+    container_name: frontend
+    
+    # Specify the port where we can acess the app
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - public
+    restart: no 
+
+networks:
+  internal:
+    name: internal-network
+    driver: bridge
+  public:
+    name: public-network
+    driver: bridge
+``
+
