@@ -24,5 +24,4 @@ jobs:
 
       # Build and test your application with Maven
       - name: Build and test with Maven
-        run: cd "C:\Users\dbouq\OneDrive - Fondation EPF\4A\DevOps\DevOps\TP\TP2\simple-api" && mvn clean verify
-
+        run: cd ./TP/TP2/simple-api && mvn clean verify
