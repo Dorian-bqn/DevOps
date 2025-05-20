@@ -1,0 +1,64 @@
+name: Build and Push Docker Images
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push-docker-image:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Wait for test-backend workflow to complete successfully
+        uses: actions/github-script@v6
+        id: wait_for_test_backend
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const branch = 'main';
+            const workflow_id = 'Test Backend'; // Must exactly match the workflow name
+            const runs = await github.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id,
+              branch,
+              per_page: 1,
+            });
+            if (runs.data.total_count === 0) {
+              core.setFailed('No previous test-backend workflow run found.');
+              return;
+            }
+            const lastRun = runs.data.workflow_runs[0];
+            if (lastRun.status !== 'completed' || lastRun.conclusion !== 'success') {
+              core.setFailed('Latest test-backend workflow run did not complete successfully.');
+              return;
+            }
+            console.log('test-backend workflow passed, proceeding.');
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP/TP2/simple-api
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-backend:latest
+          push: true
+
+      - name: Build and push database image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP/TP2/database
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-database:latest
+          push: true
+
+      - name: Build and push httpd image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP/TP2/http-server
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-frontend:latest
+          push: true
