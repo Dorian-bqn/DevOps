@@ -1,6 +1,7 @@
 name: CI and CD Pipeline
 
 on:
+#to begin you want to launch this job in main and develop
   push:
     branches:
       - main
@@ -10,22 +11,25 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-24.04
+#checkout your github code using actions/checkout@v4
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
+#do the same with another action (actions/setup-java@v4) that enable to setup jdk 21
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-
+#finally build your app with the latest command
       - name: Build and test with Maven
         run: mvn -f ./TP/TP2/simple-api/pom.xml clean verify
-
+# define job to build and publish docker image
   build-and-push-docker-image:
     needs: test-backend
+ # run only when code is compiling and tests are passing
     runs-on: ubuntu-24.04
+# steps to perform in job
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -36,20 +40,22 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
-          context: ./TP/TP2/simple-api  # adjust if your Dockerfile is in another folder
+ # relative path to the place where source code with Dockerfile is located
+          context: ./TP/TP2/simple-api
+# Note: tags has to be all lower-case
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-backend:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push database image
         uses: docker/build-push-action@v6
         with:
-          context: ./TP/TP2/database  # adjust as needed
+          context: ./TP/TP2/database
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-database:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Build and push httpd image
         uses: docker/build-push-action@v6
         with:
-          context: ./TP/TP2/http-server # adjust as needed
+          context: ./TP/TP2/http-server
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-frontend:latest
           push: ${{ github.ref == 'refs/heads/main' }}
