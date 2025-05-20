@@ -36,7 +36,7 @@ jobs:
       - name: Build and push backend image
         uses: docker/build-push-action@v6
         with:
-          context: ./backend  # adjust if your Dockerfile is in another folder
+          context: ./TP/TP2/backend  # adjust if your Dockerfile is in another folder
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-backend:latest
           push: ${{ github.ref == 'refs/heads/main' }}
 
