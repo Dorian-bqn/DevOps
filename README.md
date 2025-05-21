@@ -229,3 +229,113 @@ We use secured variables to keep sensitive information private. Logins for Docke
 ### 2-4 For what purpose do we need to push docker images?
 
 Here we only push the images if the commit is from the main branch so it is supposed to be a stable version. This way we can always retreive the latest stable version from Docker hub if needed.
+
+## TP3 Ansible
+
+### 3-1 Document your inventory and base commands
+
+My folder inventories only contains setup.yml for the moment.
+
+Here are the commands I used until this point:
+
+I used mkdir to crate the different folders my-project, ansible and inventories:
+```
+sudo mkdir my-project
+```
+Then I created the setup.yml file with nano:
+```
+cd my-project/ansible/inventories
+sudo nano setup.yml
+```
+Then I completed the setup file with the code provided:
+```
+all:
+ vars:
+   ansible_user: admin
+   ansible_ssh_private_key_file: /home/dbouquin/id_rsa
+ children:
+   prod:
+     hosts: dorian.bouquin.takima.cloud
+
+```
+And finally I ran the different commands provided:
+```
+cd ..
+ansible all -i inventories/setup.yml -m ping
+ansible all -i inventories/setup.yml -m setup -a "filter=ansible_distribution*"
+ansible all -i inventories/setup.yml -m apt -a "name=apache2 state=absent" --become
+```
+
+### 3-2 Document your playbook
+
+Here is my playbook file:
+```
+- hosts: all
+  gather_facts: true
+  become: true
+
+  roles:
+    - docker
+```
+Basically, we just created a role called docker and in its folder task/main.yml we put the tasks that were previously in playbook.yml.
+Here is the main.yml from roles/docker/tasks:
+```
+---
+# tasks file for roles/docker
+# Install prerequisites for Docker
+    - name: Install required packages
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+          - python3-venv
+        state: latest
+        update_cache: yes
+
+    # Add Docker’s official GPG key
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    # Set up the Docker stable repository
+    - name: Add Docker APT repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_facts['distribution_release'] }} stable"
+        state: present
+        update_cache: yes
+
+    # Install Docker
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    # Install Python3 and pip3
+    - name: Install Python3 and pip3
+      apt:
+        name:
+          - python3
+          - python3-pip
+        state: present
+
+    # Create a virtual environment for Python packages
+    - name: Create a virtual environment for Docker SDK
+      command: python3 -m venv /opt/docker_venv
+      args:
+        creates: /opt/docker_venv  # Only runs if this directory doesn’t exist
+
+    # Install Docker SDK for Python in the virtual environment
+    - name: Install Docker SDK for Python in virtual environment
+      command: /opt/docker_venv/bin/pip install docker
+
+    # Ensure Docker is running
+    - name: Make sure Docker is running
+      service:
+        name: docker
+        state: started
+      tags: docker
+```
