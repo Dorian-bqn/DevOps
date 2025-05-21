@@ -229,3 +229,5 @@ We use secured variables to keep sensitive information private. Logins for Docke
 ### 2-4 For what purpose do we need to push docker images?
 
 Here we only push the images if the commit is from the main branch so it is supposed to be a stable version. This way we can always retreive the latest stable version from Docker hub if needed.
+
+test
