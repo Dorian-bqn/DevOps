@@ -1,0 +1,8 @@
+all:
+ vars:
+   ansible_user: admin
+   ansible_ssh_private_key_file: /home/dbouquin/id_rsa
+ children:
+   prod:
+     hosts: dorian.bouquin.takima.cloud
+

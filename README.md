@@ -339,3 +339,113 @@ Here is the main.yml from roles/docker/tasks:
         state: started
       tags: docker
 ```
+
+### 3-3 Document your docker_container tasks configuration.
+
+Using ansible-galaxy init roles/ I created 5 new roles:
+```
+ansible-galaxy init roles/env
+ansible-galaxy init roles/network
+ansible-galaxy init roles/database
+ansible-galaxy init roles/app
+ansible-galaxy init roles/proxy
+```
+Then I built the different tasks/main.yml from what I had in my docker-compose.yaml:
+
+env:
+```
+---
+
+- name: Set the env file
+  # Copy the local env file to the remote host at /tmp/.env
+  copy:
+    src: files/.env          # Source file path relative to the role directory
+    dest: /tmp/.env          # Destination path on the remote machine
+    mode: '0644'             # Set file permissions to rw-r--r--
+
+```
+network:
+```
+---
+- name: Create internal Docker network
+  vars:
+      ansible_python_interpreter: /opt/docker_venv/bin/python3  # Use virtualenv python with Docker SDK installed (didn't work without)
+  docker_network:
+    name: internal-network
+    driver: bridge     
+    state: present              # Ensure the network exists
+
+- name: Create public Docker network
+  vars:
+      ansible_python_interpreter: /opt/docker_venv/bin/python3
+  docker_network:
+    name: public-network         # Another Docker network for public access to separate the database and proxy containers
+    driver: bridge
+    state: present
+```
+database:
+```
+---
+
+- name: Run database container
+  docker_container:
+    name: database                      
+    image: dorianbqn/tp2-database:latest  # Docker image for the database
+    state: started                      # Ensure container is running
+    restart_policy: unless-stopped     # keep container alive unless stopped manually
+    networks:
+      - name: internal-network          # Attach container to internal network
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python3
+```
+app:
+```
+---
+
+- name: Run app container
+  docker_container:
+    name: simple-api                    
+    image: dorianbqn/tp2-backend:latest  
+    state: started
+    restart_policy: on-failure          # Restart container only on failure
+    restart_retries: 3                  # Retry up to 3 times
+    networks:
+      - name: internal-network          # Connect to internal network
+      - name: public-network            # Connect also to public network to make the link with the proxy container
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python3
+```
+proxy:
+```
+---
+
+- name: Run proxy container
+  docker_container:
+    name: frontend                    
+    image: dorianbqn/tp2-frontend:latest  
+    state: started
+    restart_policy: no                 # Do not restart automatically
+    ports:
+      - "80:80"                       # Map host port 80 to container port 80
+    networks:
+      - name: public-network          # Connect to public Docker network
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python3
+```
+
+Finaly I add the new roles to my playbook:
+```
+- hosts: all
+  gather_facts: true
+  become: true
+
+  roles:
+    - docker       # Role for Docker prerequisites and SDK setup
+    - env          # Role to deploy environment variables file to remote hosts
+    - network      # Role to create Docker networks required by containers
+    - database     # Role to run the database container
+    - app          # Role to run the backend application container
+    - proxy        # Role to run the frontend proxy container
+```
+
+NB: The .env file is located in ansible/roles/env/files/.env_sample

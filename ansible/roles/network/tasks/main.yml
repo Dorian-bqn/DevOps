@@ -1,0 +1,17 @@
+---
+# tasks file for roles/network
+- name: Create internal Docker network
+  vars:
+      ansible_python_interpreter: /opt/docker_venv/bin/python3
+  docker_network:
+    name: internal-network
+    driver: bridge
+    state: present
+
+- name: Create public Docker network
+  vars:
+      ansible_python_interpreter: /opt/docker_venv/bin/python3
+  docker_network:
+    name: public-network
+    driver: bridge
+    state: present

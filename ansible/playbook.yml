@@ -1,0 +1,14 @@
+- hosts: all
+  gather_facts: true
+  become: true
+
+
+  roles:
+    - docker
+    - env
+    - network
+    - database
+    - app
+    - proxy
+
+

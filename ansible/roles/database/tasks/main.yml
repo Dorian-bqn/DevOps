@@ -1,0 +1,12 @@
+---
+# tasks file for roles/database
+- name: Run database container
+  docker_container:
+    name: database
+    image: dorianbqn/tp2-database:latest
+    state: started
+    restart_policy: unless-stopped
+    networks:
+      - name: internal-network
+  vars:
+    ansible_python_interpreter: /opt/docker_venv/bin/python3
