@@ -11,5 +11,8 @@
     networks:
       - name: internal-network
       - name: public-network
+    env:
+      DATABASE_HOST: database
+      DATABASE_PASSWORD: pwd
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python3

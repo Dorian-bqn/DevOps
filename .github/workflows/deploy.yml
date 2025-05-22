@@ -22,9 +22,9 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.ID_RSA }}
       
-      - name: Create env file
-        run: |
-          sudo echo "${{ secrets.ENV_VARIABLES }}" > .env
+      # - name: Create env file
+      #   run: |
+      #    echo "${{ secrets.ENV_VARIABLES }}" > .env
       
       - name: Run Ansible playbook
         env:
