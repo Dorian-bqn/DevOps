@@ -4,6 +4,7 @@
   docker_container:
     name: frontend
     image: dorianbqn/tp2-frontend:latest
+    pull: yes
     state: started
     restart_policy: no
     ports:

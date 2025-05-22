@@ -4,6 +4,7 @@
   docker_container:
     name: database
     image: dorianbqn/tp2-database:latest
+    pull: yes
     state: started
     restart_policy: unless-stopped
     networks:

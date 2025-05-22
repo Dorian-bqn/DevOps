@@ -4,6 +4,7 @@
   docker_container:
     name: simple-api
     image: dorianbqn/tp2-backend:latest
+    pull: yes
     state: started
     restart_policy: on-failure
     restart_retries: 3
