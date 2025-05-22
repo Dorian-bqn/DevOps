@@ -1,12 +1,13 @@
 name: Deploy App
 
-# on:
-#   workflow_run:
-#     workflows: ["Build and Push Docker Images"]
-#     branches:
-#       - main
-#     types:
-#       - completed
+on:
+  # workflow_run:
+  #   workflows: ["Build and Push Docker Images"]
+  push:
+    branches:
+      - main
+    # types:
+    #   - completed
 
 jobs:
   deploy:
