@@ -3,6 +3,6 @@
 
 - name: Set the env file
   copy:
-    src: files/.env
+    src: ${{ secrets.ENV_VARIABLES}}
     dest: /tmp/.env
     mode: '0644'
