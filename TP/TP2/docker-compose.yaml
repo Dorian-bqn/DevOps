@@ -2,8 +2,8 @@ services:
 
   database:
     build: "database"
-    environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    env_file:
+      - .env
     volumes:
       - db-volume:/var/lib/postgresql/data
     networks:
@@ -11,9 +11,8 @@ services:
 
   simple-api:
     build: "simple-api"
-    environment:
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_PASSWORD={DATABASE_PASSWORD}
+    env_file:
+      - .env
     networks:
       - my-network
 
