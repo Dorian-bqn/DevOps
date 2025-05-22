@@ -8,5 +8,7 @@
     restart_policy: unless-stopped
     networks:
       - name: internal-network
+    env:
+      POSTGRES_PASSWORD: "psw"
   vars:
     ansible_python_interpreter: /opt/docker_venv/bin/python3
