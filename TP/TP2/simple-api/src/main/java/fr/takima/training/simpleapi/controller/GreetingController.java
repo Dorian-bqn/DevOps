@@ -16,6 +16,7 @@ public class GreetingController {
         return new Greeting(counter.incrementAndGet(), String.format(TEMPLATE, name));
     }
 
+    @GetMapping("/deploy")
     public String deploy() {
         return "Deployment Successful";
     }
