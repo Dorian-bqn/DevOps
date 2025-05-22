@@ -24,7 +24,7 @@ jobs:
       
       - name: Create env file
         run: |
-          echo "${{ secrets.ENV_VARIABLES}}" > .env
+          echo "${{ secrets.ENV_VARIABLES }}" > .env
       
       - name: Run Ansible playbook
         env:
