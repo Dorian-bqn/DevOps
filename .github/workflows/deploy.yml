@@ -18,4 +18,5 @@ jobs:
 
     - name: Run Ansible to start apache2 service
       run: |
-        ansible all -m service -a "name=apache2 state=started" --private-key=${id_rsa} -u admin --become
+        ansible-playbook -i ./ansible/inventories/setup.yml ./ansible/playbook.yml -e "ansible_user=${{ secrets.IP_RSA }}" -e "ansible_host=${{ secrets.SERVER_IP }}"
+
