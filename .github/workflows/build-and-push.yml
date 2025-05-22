@@ -1,40 +1,41 @@
 # name: Build and Push Docker Images
 
-# on:
+on:
 #   workflow_run:
 #     workflows: ["Test Backend"]
-#     branches:
-#       - main
+  push:
+    branches:
+      - main
 #     types:
 #       - completed
 
-# jobs:
-#   build-and-push-docker-image:
-#     runs-on: ubuntu-24.04
+jobs:
+  build-and-push-docker-image:
+    runs-on: ubuntu-24.04
 
-#     steps:
-#       - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-#       - name: Log in to DockerHub
-#         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
-#       - name: Build and push backend image
-#         uses: docker/build-push-action@v6
-#         with:
-#           context: ./TP/TP2/simple-api
-#           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-simple-api:latest
-#           push: true
+      - name: Build and push backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP/TP2/simple-api
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-simple-api:latest
+          push: true
 
-#       - name: Build and push database image
-#         uses: docker/build-push-action@v6
-#         with:
-#           context: ./TP/TP2/database
-#           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-database:latest
-#           push: true
+      - name: Build and push database image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP/TP2/database
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-database:latest
+          push: true
 
-#       - name: Build and push httpd image
-#         uses: docker/build-push-action@v6
-#         with:
-#           context: ./TP/TP2/http-server
-#           tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-frontend:latest
-#           push: true
+      - name: Build and push httpd image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP/TP2/http-server
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tp2-frontend:latest
+          push: true
